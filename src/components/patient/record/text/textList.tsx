@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import RecordMediaSheet from '../RecordMediaSheet'
 
 interface TextRecord {
   id: string
@@ -27,6 +29,7 @@ function StatusBadge({ status }: { status: TextRecord['status'] }) {
 
 function TextList({ records = TEXT_RECORDS }: { records?: TextRecord[] }) {
   const navigate = useNavigate()
+  const [selected, setSelected] = useState<TextRecord | null>(null)
 
   return (
     <div>
@@ -37,25 +40,31 @@ function TextList({ records = TEXT_RECORDS }: { records?: TextRecord[] }) {
             key={r.id}
             className="flex items-center gap-3.5 rounded-[22px] border border-black/[0.04] bg-white p-3.5 shadow-[0_10px_24px_-18px_rgba(20,35,29,0.35)] transition-shadow duration-200 hover:shadow-[0_14px_28px_-16px_rgba(20,35,29,0.4)]"
           >
-            <span
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[13px] text-center font-mono text-[10px] leading-tight font-semibold text-black/40"
-              style={{
-                backgroundImage: 'repeating-linear-gradient(135deg, rgba(20,35,29,.05) 0 8px, transparent 8px 16px)',
-              }}
+            <button
+              type="button"
+              onClick={() => setSelected(r)}
+              className="flex flex-1 cursor-pointer items-center gap-3.5 text-left"
             >
-              검진
-              <br />
-              결과지
-            </span>
-            <div className="flex-1">
-              <p className="text-sm font-bold text-ink">{r.title}</p>
-              <p className="mt-0.5 text-xs text-ink-muted">
-                {r.date} · {r.hospital}
-              </p>
-              <div className="mt-1.5">
-                <StatusBadge status={r.status} />
+              <span
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[13px] text-center font-mono text-[10px] leading-tight font-semibold text-black/40"
+                style={{
+                  backgroundImage: 'repeating-linear-gradient(135deg, rgba(20,35,29,.05) 0 8px, transparent 8px 16px)',
+                }}
+              >
+                검진
+                <br />
+                결과지
+              </span>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-ink">{r.title}</p>
+                <p className="mt-0.5 text-xs text-ink-muted">
+                  {r.date} · {r.hospital}
+                </p>
+                <div className="mt-1.5">
+                  <StatusBadge status={r.status} />
+                </div>
               </div>
-            </div>
+            </button>
             <button
               type="button"
               onClick={() => navigate(`/record/analysis/${r.id}`)}
@@ -66,6 +75,18 @@ function TextList({ records = TEXT_RECORDS }: { records?: TextRecord[] }) {
           </div>
         ))}
       </div>
+
+      {selected && (
+        <RecordMediaSheet
+          open
+          onClose={() => setSelected(null)}
+          title={selected.title}
+          typeLabel="검진 결과지"
+          date={selected.date}
+          hospital={selected.hospital}
+          status={selected.status}
+        />
+      )}
     </div>
   )
 }

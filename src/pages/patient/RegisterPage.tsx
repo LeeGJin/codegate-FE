@@ -1,5 +1,8 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
+import { kakaoSignup } from '../../services/kakaoAuth'
 
 const YEARS = Array.from({ length: 71 }, (_, i) => 2010 - i)
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -11,15 +14,42 @@ const REGIONS = [
 
 function RegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const auth = useAuth()
+  const showToast = useToast()
+  const { code, redirectUri } = (location.state ?? {}) as { code?: string; redirectUri?: string }
   const [name, setName] = useState('')
   const [gender, setGender] = useState<'male' | 'female' | null>(null)
   const [year, setYear] = useState(1985)
   const [month, setMonth] = useState(3)
   const [day, setDay] = useState(12)
   const [region, setRegion] = useState('서울')
+  const [rrn, setRrn] = useState('')
 
-  function handleNext() {
-    navigate('/register/health', { state: { name, gender, year, month, day, region } })
+  useEffect(() => {
+    if (!code || !redirectUri) navigate('/login', { replace: true })
+  }, [code, redirectUri, navigate])
+
+  async function handleNext() {
+    if (!code || !redirectUri) return
+    if (!name || !gender || !rrn) {
+      showToast('이름, 성별, 주민등록번호를 입력해 주세요', 'error')
+      return
+    }
+    try {
+      const result = await kakaoSignup({
+        code,
+        redirectUri,
+        name,
+        gender,
+        birthDate: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+        residentRegistrationNumber: rrn,
+      })
+      auth.login(result)
+      navigate('/register/health', { state: { name, gender, year, month, day, region } })
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : '회원가입에 실패했어요', 'error')
+    }
   }
 
   return (
@@ -104,6 +134,17 @@ function RegisterPage() {
             ))}
           </select>
         </div>
+
+        <div className="mb-2 text-[13px] font-bold text-ink">주민등록번호</div>
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder="숫자 13자리"
+          value={rrn}
+          maxLength={13}
+          onChange={(e) => setRrn(e.target.value.replace(/\D/g, ''))}
+          className="mb-[18px] w-full rounded-[13px] border border-black/12 bg-white p-3.5 text-[15px] font-bold text-ink placeholder:font-normal placeholder:text-ink-faint"
+        />
 
         <div className="mb-2 text-[13px] font-bold text-ink">거주 지역</div>
         <select

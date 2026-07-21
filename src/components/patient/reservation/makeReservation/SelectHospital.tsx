@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getDepartments, getDistricts } from '../../../../api/meta'
+import type { MetaItem } from '../../../../api/meta'
 
-const DEPARTMENTS = ['내과', '가정의학과', '정형외과', '이비인후과', '피부과']
 const DATES = ['7/22 (화)', '7/23 (수)', '7/24 (목)', '7/25 (금)']
 const TIME_PERIODS = ['오전', '오후', '저녁']
 
@@ -9,28 +10,31 @@ const REGIONS = [
   '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주',
 ]
 
-const SEOUL_DISTRICTS = [
-  '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구',
-  '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구',
-  '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구',
-]
-
-const DISTRICTS_BY_REGION: Record<string, string[]> = {
-  서울: SEOUL_DISTRICTS,
-}
-
 function SelectHospital() {
-  const [department, setDepartment] = useState(DEPARTMENTS[0])
+  const [departments, setDepartments] = useState<MetaItem[]>([])
+  const [seoulDistricts, setSeoulDistricts] = useState<MetaItem[]>([])
+  const [department, setDepartment] = useState('')
   const [date, setDate] = useState(DATES[1])
   const [period, setPeriod] = useState(TIME_PERIODS[0])
   const [region, setRegion] = useState(REGIONS[0])
-  const [district, setDistrict] = useState(SEOUL_DISTRICTS[0])
+  const [district, setDistrict] = useState('')
 
-  const districts = DISTRICTS_BY_REGION[region] ?? []
+  useEffect(() => {
+    getDepartments().then((data) => {
+      setDepartments(data)
+      setDepartment(data[0]?.code ?? '')
+    })
+    getDistricts().then((data) => {
+      setSeoulDistricts(data)
+      setDistrict(data[0]?.code ?? '')
+    })
+  }, [])
+
+  const districts = region === '서울' ? seoulDistricts : []
 
   function handleRegionChange(value: string) {
     setRegion(value)
-    setDistrict(DISTRICTS_BY_REGION[value]?.[0] ?? '')
+    setDistrict(value === '서울' ? (seoulDistricts[0]?.code ?? '') : '')
   }
 
   return (
@@ -60,8 +64,8 @@ function SelectHospital() {
           >
             {districts.length > 0 ? (
               districts.map((d) => (
-                <option key={d} value={d}>
-                  {d}
+                <option key={d.code} value={d.code}>
+                  {d.label}
                 </option>
               ))
             ) : (
@@ -79,9 +83,9 @@ function SelectHospital() {
             onChange={(e) => setDepartment(e.target.value)}
             className="w-full rounded-xl border border-black/[0.08] bg-[#f0f5f2] p-3 text-sm font-bold text-ink"
           >
-            {DEPARTMENTS.map((d) => (
-              <option key={d} value={d}>
-                {d}
+            {departments.map((d) => (
+              <option key={d.code} value={d.code}>
+                {d.label}
               </option>
             ))}
           </select>

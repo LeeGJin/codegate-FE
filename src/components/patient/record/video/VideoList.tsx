@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import RecordMediaSheet from '../RecordMediaSheet'
+
 interface VideoRecord {
   id: string
   type: 'MRI' | 'CT' | '소견서'
@@ -28,14 +31,18 @@ function StatusBadge({ status }: { status: VideoRecord['status'] }) {
 }
 
 function VideoList({ records = VIDEO_RECORDS }: { records?: VideoRecord[] }) {
+  const [selected, setSelected] = useState<VideoRecord | null>(null)
+
   return (
     <div>
       <p className="mb-3 px-0.5 text-[13px] font-bold text-ink-soft">등록된 자료 {records.length}건</p>
       <div className="flex flex-col gap-3">
         {records.map((r) => (
-          <div
+          <button
             key={r.id}
-            className="flex items-center gap-3.5 rounded-[22px] border border-black/[0.04] bg-white p-3.5 shadow-[0_10px_24px_-18px_rgba(20,35,29,0.35)] transition-shadow duration-200 hover:shadow-[0_14px_28px_-16px_rgba(20,35,29,0.4)]"
+            type="button"
+            onClick={() => setSelected(r)}
+            className="flex cursor-pointer items-center gap-3.5 rounded-[22px] border border-black/[0.04] bg-white p-3.5 text-left shadow-[0_10px_24px_-18px_rgba(20,35,29,0.35)] transition-all duration-200 hover:shadow-[0_14px_28px_-16px_rgba(20,35,29,0.4)] active:scale-[0.99]"
           >
             <span
               className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[13px] text-center font-mono text-[10px] leading-tight font-semibold text-black/40"
@@ -54,9 +61,22 @@ function VideoList({ records = VIDEO_RECORDS }: { records?: VideoRecord[] }) {
                 <StatusBadge status={r.status} />
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
+
+      {selected && (
+        <RecordMediaSheet
+          open
+          onClose={() => setSelected(null)}
+          title={selected.title}
+          typeLabel={selected.type}
+          date={selected.date}
+          hospital={selected.hospital}
+          status={selected.status}
+          isVideo={selected.type !== '소견서'}
+        />
+      )}
     </div>
   )
 }

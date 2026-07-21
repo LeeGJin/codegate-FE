@@ -1,7 +1,17 @@
-import { useNavigate } from 'react-router-dom'
+import { useToast } from '../../context/ToastContext'
+import { getKakaoLoginUrl } from '../../services/kakaoAuth'
 
 function LoginPage() {
-  const navigate = useNavigate()
+  const showToast = useToast()
+
+  async function handleKakaoStart() {
+    try {
+      const redirectUri = `${window.location.origin}/oauth/kakao/callback`
+      window.location.href = await getKakaoLoginUrl(redirectUri)
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : '로그인에 실패했어요', 'error')
+    }
+  }
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-[480px] flex-col bg-onboarding-bg">
@@ -23,7 +33,7 @@ function LoginPage() {
 
         <button
           type="button"
-          onClick={() => navigate('/register')}
+          onClick={handleKakaoStart}
           className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-kakao py-4"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--color-kakao-ink)">
