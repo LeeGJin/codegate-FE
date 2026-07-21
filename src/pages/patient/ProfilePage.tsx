@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import NavBar from '../../components/patient/public/NavBar'
+import { useAuth } from '../../context/AuthContext'
 
 const YEARS = Array.from({ length: 71 }, (_, i) => 2010 - i)
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -52,22 +53,24 @@ function ChipGroup({
 
 function ProfilePage() {
   const navigate = useNavigate()
+  const { name: authName } = useAuth()
   const [editing, setEditing] = useState(false)
-  const [name, setName] = useState('김민수')
-  const [gender, setGender] = useState<'male' | 'female'>('male')
-  const [year, setYear] = useState(1985)
-  const [month, setMonth] = useState(3)
-  const [day, setDay] = useState(12)
-  const [region, setRegion] = useState('서울')
-  const [medications, setMedications] = useState<string[]>(['고혈압약'])
-  const [conditions, setConditions] = useState<string[]>(['고혈압'])
+  const [name, setName] = useState(authName ?? '')
+  const [gender, setGender] = useState<'male' | 'female' | null>(null)
+  const [year, setYear] = useState<number | null>(null)
+  const [month, setMonth] = useState<number | null>(null)
+  const [day, setDay] = useState<number | null>(null)
+  const [region, setRegion] = useState('')
+  const [medications, setMedications] = useState<string[]>([])
+  const [conditions, setConditions] = useState<string[]>([])
 
-  const birthDisplay = `${year}.${String(month).padStart(2, '0')}.${String(day).padStart(2, '0')}`
+  const birthDisplay =
+    year && month && day ? `${year}.${String(month).padStart(2, '0')}.${String(day).padStart(2, '0')}` : '-'
   const basicInfoRows: [string, string][] = [
     ['이름', name || '-'],
-    ['성별', gender === 'male' ? '남성' : '여성'],
+    ['성별', gender === 'male' ? '남성' : gender === 'female' ? '여성' : '-'],
     ['생년월일', birthDisplay],
-    ['거주 지역', region],
+    ['거주 지역', region || '-'],
   ]
 
   return (
@@ -143,7 +146,7 @@ function ProfilePage() {
             <div className="mb-1.5 text-xs font-bold text-ink-muted">생년월일</div>
             <div className="mb-3.5 flex gap-2">
               <select
-                value={year}
+                value={year ?? YEARS[0]}
                 onChange={(e) => setYear(Number(e.target.value))}
                 className="flex-[1.4] rounded-[11px] border border-black/10 bg-[#f0f5f2] px-2 py-3 text-sm font-bold text-ink transition-colors duration-200 focus:border-primary-text/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
               >
@@ -154,7 +157,7 @@ function ProfilePage() {
                 ))}
               </select>
               <select
-                value={month}
+                value={month ?? MONTHS[0]}
                 onChange={(e) => setMonth(Number(e.target.value))}
                 className="flex-1 rounded-[11px] border border-black/10 bg-[#f0f5f2] px-2 py-3 text-sm font-bold text-ink transition-colors duration-200 focus:border-primary-text/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
               >
@@ -165,7 +168,7 @@ function ProfilePage() {
                 ))}
               </select>
               <select
-                value={day}
+                value={day ?? DAYS[0]}
                 onChange={(e) => setDay(Number(e.target.value))}
                 className="flex-1 rounded-[11px] border border-black/10 bg-[#f0f5f2] px-2 py-3 text-sm font-bold text-ink transition-colors duration-200 focus:border-primary-text/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
               >
@@ -178,7 +181,7 @@ function ProfilePage() {
             </div>
             <div className="mb-1.5 text-xs font-bold text-ink-muted">거주 지역</div>
             <select
-              value={region}
+              value={region || REGIONS[0]}
               onChange={(e) => setRegion(e.target.value)}
               className="w-full rounded-xl border border-black/10 bg-[#f0f5f2] p-3 text-[15px] font-bold text-ink transition-colors duration-200 focus:border-primary-text/50 focus:ring-2 focus:ring-primary/20 focus:outline-none"
             >
