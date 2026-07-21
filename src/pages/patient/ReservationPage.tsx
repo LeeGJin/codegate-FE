@@ -1,18 +1,26 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import SelectHospital from '../../components/patient/reservation/makeReservation/SelectHospital'
 import SearchResult from '../../components/patient/reservation/makeReservation/SearchResult'
 import ReservationSearchList from '../../components/patient/reservation/viewReservation/ReservationSearchList'
 import NavBar from '../../components/patient/public/NavBar'
 import { searchHospitals } from '../../api/hospitals'
 import type { HospitalSearchHospital, SearchHospitalsParams } from '../../api/hospitals'
+import { getPatientReservations } from '../../api/reservations'
+import type { PatientReservation } from '../../api/reservations'
 
 function ReservationPage() {
   const [tab, setTab] = useState<'make' | 'view'>('make')
   const [hospitals, setHospitals] = useState<HospitalSearchHospital[]>([])
+  const [reservations, setReservations] = useState<PatientReservation[]>([])
 
   const handleFilterChange = useCallback((params: SearchHospitalsParams) => {
     searchHospitals(params).then((result) => setHospitals(result.hospitals))
   }, [])
+
+  useEffect(() => {
+    if (tab !== 'view') return
+    getPatientReservations().then((result) => setReservations(result.content))
+  }, [tab])
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-[480px] flex-col bg-app-bg">
@@ -46,7 +54,7 @@ function ReservationPage() {
             <SearchResult hospitals={hospitals} />
           </div>
         ) : (
-          <ReservationSearchList />
+          <ReservationSearchList reservations={reservations} />
         )}
       </main>
 

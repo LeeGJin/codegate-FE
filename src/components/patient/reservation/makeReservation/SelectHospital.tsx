@@ -3,26 +3,13 @@ import { getDepartments, getDistricts } from '../../../../api/meta'
 import type { MetaItem } from '../../../../api/meta'
 import type { SearchHospitalsParams } from '../../../../api/hospitals'
 
-const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
-
-function nextDates(count: number) {
-  return Array.from({ length: count }, (_, i) => {
-    const d = new Date()
-    d.setDate(d.getDate() + i + 1)
-    const value = d.toISOString().slice(0, 10)
-    const label = `${d.getMonth() + 1}/${d.getDate()} (${WEEKDAY_LABELS[d.getDay()]})`
-    return { label, value }
-  })
-}
-
-const DATES = nextDates(4)
 const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, '0')}:00`)
 
 function SelectHospital({ onFilterChange }: { onFilterChange: (params: SearchHospitalsParams) => void }) {
   const [departments, setDepartments] = useState<MetaItem[]>([])
   const [districts, setDistricts] = useState<MetaItem[]>([])
   const [department, setDepartment] = useState('')
-  const [date, setDate] = useState(DATES[1].value)
+  const [date, setDate] = useState('')
   const [district, setDistrict] = useState('')
   const [fromTime, setFromTime] = useState('')
   const [toTime, setToTime] = useState('')
@@ -43,7 +30,7 @@ function SelectHospital({ onFilterChange }: { onFilterChange: (params: SearchHos
     onFilterChange({
       district,
       department: department || undefined,
-      date,
+      date: date || undefined,
       fromTime: fromTime || undefined,
       toTime: toTime || undefined,
     })
@@ -90,17 +77,12 @@ function SelectHospital({ onFilterChange }: { onFilterChange: (params: SearchHos
       <div className="mb-3">
         <label>
           <div className="mb-1.5 text-xs font-semibold text-ink-muted">날짜</div>
-          <select
+          <input
+            type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="w-full rounded-xl border border-black/[0.08] bg-[#f0f5f2] p-3 text-sm font-bold text-ink"
-          >
-            {DATES.map((d) => (
-              <option key={d.value} value={d.value}>
-                {d.label}
-              </option>
-            ))}
-          </select>
+          />
         </label>
       </div>
 

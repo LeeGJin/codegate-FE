@@ -5,6 +5,7 @@ import InformationPage from './pages/patient/InformationPage'
 import KakaoCallbackPage from './pages/patient/KakaoCallbackPage'
 import HomePage from './pages/patient/HomePage'
 import ReservationPage from './pages/patient/ReservationPage'
+import ReservationDetailPage from './pages/patient/ReservationDetailPage'
 import RecordPage from './pages/patient/RecordPage'
 import AiReportPage from './pages/patient/AiReportPage'
 import ProfilePage from './pages/patient/ProfilePage'
@@ -21,6 +22,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />
         <Route path="/reservation" element={<ReservationPage />} />
+        <Route path="/reservation/:id" element={<ReservationDetailPage />} />
         <Route path="/record" element={<RecordPage />} />
         <Route path="/record/analysis/:id" element={<AiReportPage />} />
         <Route path="/profile" element={<ProfilePage />} />
