@@ -1,6 +1,22 @@
-function TextUpload() {
+import { useRef } from 'react'
+
+interface TextUploadProps {
+  uploading?: boolean
+  onUpload: (file: File) => void
+}
+
+function TextUpload({ uploading = false, onUpload }: TextUploadProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    onUpload(file)
+  }
+
   return (
-    <div className="group mb-5 cursor-pointer rounded-[20px] border-2 border-dashed border-[#a9c6b8] bg-white px-5 py-[34px] text-center transition-all duration-200 active:scale-[0.99] hover:border-primary-text/50 hover:shadow-[0_14px_28px_-18px_rgba(20,35,29,0.3)]">
+    <div className="group mb-5 rounded-[20px] border-2 border-dashed border-[#a9c6b8] bg-white px-5 py-[34px] text-center transition-all duration-200 hover:border-primary-text/50 hover:shadow-[0_14px_28px_-18px_rgba(20,35,29,0.3)]">
       <div className="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-primary-bg transition-transform duration-200 group-hover:scale-105">
         <svg
           width="26"
@@ -16,7 +32,16 @@ function TextUpload() {
         </svg>
       </div>
       <p className="text-base font-bold text-ink">건강검진결과지 업로드</p>
-      <p className="mt-1.5 text-[13px] text-ink-muted">JPG · PNG · PDF 파일 지원</p>
+      <p className="mt-1.5 text-[13px] text-ink-muted">PDF 파일만 지원</p>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="mt-4 cursor-pointer rounded-xl bg-primary px-5 py-3 text-sm font-extrabold text-white transition-all duration-200 hover:bg-primary-deep active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink-faint"
+      >
+        {uploading ? '업로드 중...' : 'PDF 선택'}
+      </button>
+      <input ref={inputRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleChange} />
     </div>
   )
 }
